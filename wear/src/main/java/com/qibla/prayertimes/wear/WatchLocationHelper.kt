@@ -5,6 +5,7 @@ import android.content.Context
 import android.location.Location
 import android.location.LocationManager
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.coroutines.resume
 
 /**
@@ -14,8 +15,15 @@ import kotlin.coroutines.resume
  */
 class WatchLocationHelper(private val context: Context) {
 
+    /**
+     * Bounded by a timeout — without one, a fresh GPS fix request that never completes (weak
+     * signal, indoors, no clear sky view) would leave the caller waiting forever with no way to
+     * reach the "couldn't get a location" screen and its retry/pick-a-city-instead options.
+     */
+    suspend fun getCurrentLocation(): Location? = withTimeoutOrNull(TIMEOUT_MS) { awaitLocationFix() }
+
     @SuppressLint("MissingPermission")
-    suspend fun getCurrentLocation(): Location? = suspendCancellableCoroutine { cont ->
+    private suspend fun awaitLocationFix(): Location? = suspendCancellableCoroutine { cont ->
         val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
         val providers = locationManager.getProviders(true)
         var bestLocation: Location? = null
@@ -53,5 +61,9 @@ class WatchLocationHelper(private val context: Context) {
             cont.resume(null)
         }
         cont.invokeOnCancellation { locationManager.removeUpdates(listener) }
+    }
+
+    companion object {
+        private const val TIMEOUT_MS = 25_000L
     }
 }
