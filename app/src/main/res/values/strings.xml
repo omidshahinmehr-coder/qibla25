@@ -112,6 +112,10 @@
     <!-- Notifications -->
     <string name="adhan_time_title">It\'s time for %1$s</string>
     <string name="adhan_tap_to_stop">Tap to stop the sound</string>
+    <string name="adhan_alert_hint">Tap anywhere, or press the power button, to stop the sound</string>
+    <string name="adhan_hadith_arabic">اِمْتَحِنُوا شِيعَتَنَا عِنْدَ مَوَاقِيتِ اَلصَّلاَةِ كَيْفَ مُحَافَظَتُهُمْ عَلَيْهَا</string>
+    <string name="adhan_hadith_translation">شیعیان ما را در وقت‏های نماز بیازمایید که مواظبت بر نمازشان چگونه است</string>
+    <string name="adhan_hadith_source">امام صادق علیه‌السلام — وسائل‌الشیعه، ج ۴، ص ۱۱۴</string>
     <string name="stop_sound_action">Stop sound</string>
     <string name="adhan_channel_name">Adhan</string>
     <string name="adhan_channel_desc">Prayer time alerts</string>
