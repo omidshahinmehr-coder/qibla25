@@ -51,6 +51,40 @@ object AlarmScheduler {
                 schedule(context, alarmManager, WidgetBoundaryReceiver::class.java, prayer.widgetBoundaryRequestCode, triggerAt) {}
             }
         }
+
+        // Sunrise/Sunset aren't adhan-eligible (no AdhanPrayer entry — they're informational,
+        // not a prayer), so the loop above never touches them. But the widget's own countdown
+        // still treats them as valid "next" targets (see QiblaWidget.kt's nextPrayerCountdown),
+        // so without their own widget-boundary alarm here, the widget would stay stale for up
+        // to 15 minutes after each one passes — instead of updating instantly like the five
+        // prayers do.
+        scheduleWidgetBoundaryOnly(context, alarmManager, "Sunrise", WIDGET_BOUNDARY_SUNRISE_CODE, timings, now)
+        scheduleWidgetBoundaryOnly(context, alarmManager, "Sunset", WIDGET_BOUNDARY_SUNSET_CODE, timings, now)
+    }
+
+    private fun scheduleWidgetBoundaryOnly(
+        context: Context,
+        alarmManager: AlarmManager,
+        timingsKey: String,
+        requestCode: Int,
+        timings: Map<String, String>,
+        now: Calendar
+    ) {
+        cancelWidgetBoundary(context, requestCode)
+        val triggerAt = timings[timingsKey]?.let { parseToday(it) }
+        if (triggerAt != null && !triggerAt.before(now)) {
+            schedule(context, alarmManager, WidgetBoundaryReceiver::class.java, requestCode, triggerAt) {}
+        }
+    }
+
+    private fun cancelWidgetBoundary(context: Context, requestCode: Int) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(context, WidgetBoundaryReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            context, requestCode, intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        alarmManager.cancel(pendingIntent)
     }
 
     private fun schedule(
@@ -110,6 +144,8 @@ object AlarmScheduler {
 
     fun cancelAll(context: Context) {
         AdhanPrayer.entries.forEach { cancel(context, it) }
+        cancelWidgetBoundary(context, WIDGET_BOUNDARY_SUNRISE_CODE)
+        cancelWidgetBoundary(context, WIDGET_BOUNDARY_SUNSET_CODE)
     }
 
     private fun parseToday(hhmm: String): Calendar? {
@@ -130,4 +166,8 @@ object AlarmScheduler {
 
     const val EXTRA_PRAYER = "extra_prayer"
     const val EXTRA_IS_REMINDER = "extra_is_reminder"
+
+    // Distinct from AdhanPrayer's own request-code ranges (101-105 / 601-605 / 1001-1005).
+    private const val WIDGET_BOUNDARY_SUNRISE_CODE = 1006
+    private const val WIDGET_BOUNDARY_SUNSET_CODE = 1007
 }
