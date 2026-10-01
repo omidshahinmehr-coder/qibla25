@@ -102,6 +102,7 @@
 
     <string name="adhan_time_title">حان وقت %1$s</string>
     <string name="adhan_tap_to_stop">اضغط لإيقاف الصوت</string>
+    <string name="adhan_alert_hint">اضغط في أي مكان، أو زر الطاقة، لإيقاف الصوت</string>
     <string name="stop_sound_action">إيقاف الصوت</string>
     <string name="adhan_channel_name">الأذان</string>
     <string name="adhan_channel_desc">تنبيهات مواقيت الصلاة</string>
