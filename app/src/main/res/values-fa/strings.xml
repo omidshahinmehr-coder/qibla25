@@ -102,6 +102,7 @@
 
     <string name="adhan_time_title">وقت %1$s است</string>
     <string name="adhan_tap_to_stop">برای قطع صدا ضربه بزنید</string>
+    <string name="adhan_alert_hint">برای قطع صدا هرجای صفحه یا دکمه‌ی پاور را بزنید</string>
     <string name="stop_sound_action">قطع صدا</string>
     <string name="adhan_channel_name">اذان</string>
     <string name="adhan_channel_desc">یادآوری اوقات شرعی</string>
