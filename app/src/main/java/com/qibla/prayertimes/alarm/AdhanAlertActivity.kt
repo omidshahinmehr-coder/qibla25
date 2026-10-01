@@ -1,0 +1,213 @@
+package com.qibla.prayertimes.alarm
+
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.media.AudioManager
+import android.os.Build
+import android.os.Bundle
+import android.view.WindowManager
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.qibla.prayertimes.R
+import com.qibla.prayertimes.ui.theme.AmberMuted
+import com.qibla.prayertimes.ui.theme.AmberText
+import com.qibla.prayertimes.ui.theme.Brass
+import com.qibla.prayertimes.ui.theme.NightDeep
+import com.qibla.prayertimes.ui.theme.QiblaAppTheme
+import com.qibla.prayertimes.ui.theme.ThemeState
+
+/**
+ * Shown full-screen, over the lock screen, the instant the adhan starts playing — not just a
+ * notification, per the request that a screen actually come up announcing which prayer it is,
+ * with its own stop control. Launched via the playback notification's `fullScreenIntent` (see
+ * [AdhanPlaybackService]), which is the Android-sanctioned way to bring an activity to the
+ * front from a background alarm even while the device is locked — directly calling
+ * `startActivity` from the service would be blocked by background-activity-start restrictions
+ * on Android 10+.
+ */
+class AdhanAlertActivity : ComponentActivity() {
+
+    private var screenOffReceiver: BroadcastReceiver? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // This can be the very first activity to run in the process (e.g. right after a
+        // reboot, before MainActivity ever opened this session), so the saved light/dark
+        // preference needs loading here too — not just relying on MainActivity having already
+        // done it.
+        ThemeState.initFrom(this)
+
+        showOverLockScreen()
+
+        // Hardware volume keys, while this activity is in front, adjust the alarm stream —
+        // the same stream the adhan itself plays on (see AudioAttributes.USAGE_ALARM in
+        // AdhanPlaybackService) — so raising/lowering volume here raises/lowers the adhan.
+        volumeControlStream = AudioManager.STREAM_ALARM
+
+        val prayerName = intent?.getStringExtra(AlarmScheduler.EXTRA_PRAYER)
+        val prayer = AdhanPrayer.entries.firstOrNull { it.name == prayerName } ?: AdhanPrayer.FAJR
+
+        setContent {
+            AdhanAlertScreen(prayer = prayer, onStop = ::stopAndFinish)
+        }
+    }
+
+    private fun showOverLockScreen() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(true)
+            setTurnScreenOn(true)
+        } else {
+            @Suppress("DEPRECATION")
+            window.addFlags(
+                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+                    WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or
+                    WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
+            )
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Best-effort "power button stops the adhan": Android gives apps no direct way to
+        // observe a power-button press specifically, but while this full-screen alert is the
+        // one keeping the screen on, a SCREEN_OFF broadcast arriving here is, in practice,
+        // almost always the user pressing power — the same convention alarm-clock apps use for
+        // "press power to silence". A receiver only needs to be registered while this activity
+        // is actually the one in front, hence in onResume/onPause rather than onCreate/onDestroy.
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                stopAndFinish()
+            }
+        }
+        screenOffReceiver = receiver
+        registerReceiver(receiver, IntentFilter(Intent.ACTION_SCREEN_OFF))
+    }
+
+    override fun onPause() {
+        screenOffReceiver?.let { unregisterReceiver(it) }
+        screenOffReceiver = null
+        super.onPause()
+    }
+
+    private fun stopAndFinish() {
+        AdhanPlaybackService.stopNow(this)
+        finish()
+    }
+}
+
+/** Entezar — used only for the prayer-name line; everything else on this screen uses the
+ *  app's default Estedad typography (see QiblaAppTheme). */
+private val entezarFontFamily = FontFamily(Font(R.font.entezar))
+
+@Composable
+private fun AdhanAlertScreen(prayer: AdhanPrayer, onStop: () -> Unit) {
+    val context = LocalContext.current
+
+    // Auto-dismiss the instant playback stops for any reason (safety timeout, a playback
+    // error) — not just when the user taps stop here.
+    val playing by AdhanPlaybackState.currentlyPlaying.collectAsState()
+    DisposableEffect(playing) {
+        if (playing == null) onStop()
+        onDispose { }
+    }
+
+    QiblaAppTheme {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(NightDeep)
+                .clickable(onClick = onStop)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp, vertical = 32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Hadith block, pinned near the top — uses the screen's default font
+                // (Estedad, from QiblaAppTheme's typography), same as the hint text below.
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = stringResource(R.string.adhan_hadith_arabic),
+                        color = AmberText,
+                        fontSize = 16.sp,
+                        textAlign = TextAlign.Center,
+                        lineHeight = 24.sp
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(R.string.adhan_hadith_translation),
+                        color = AmberMuted,
+                        fontSize = 13.sp,
+                        textAlign = TextAlign.Center,
+                        lineHeight = 19.sp
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        text = stringResource(R.string.adhan_hadith_source),
+                        color = AmberMuted,
+                        fontSize = 11.sp,
+                        textAlign = TextAlign.Center
+                    )
+                }
+
+                Spacer(Modifier.weight(1f))
+
+                // Prayer name + stop control, vertically centered — the only text on this
+                // screen in Entezar rather than the screen's default Estedad.
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = stringResource(R.string.adhan_time_title, prayer.label(context)),
+                        color = AmberText,
+                        fontSize = 26.sp,
+                        fontWeight = FontWeight.Bold,
+                        fontFamily = entezarFontFamily,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(Modifier.height(10.dp))
+                    Text(
+                        text = stringResource(R.string.adhan_alert_hint),
+                        color = AmberMuted,
+                        fontSize = 14.sp,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(Modifier.height(28.dp))
+                    Button(onClick = onStop, colors = ButtonDefaults.buttonColors(containerColor = Brass)) {
+                        Text(stringResource(R.string.stop_sound_action), fontSize = 16.sp)
+                    }
+                }
+
+                Spacer(Modifier.weight(1f))
+            }
+        }
+    }
+}
