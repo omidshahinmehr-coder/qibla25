@@ -54,6 +54,11 @@ val DEFAULT_CITY_CATALOG: List<CityCatalogEntry> = listOf(
     CityCatalogEntry("بیرجند", "Birjand", "بيرجند", 32.8663, 59.2211),
     CityCatalogEntry("بجنورد", "Bojnord", "بجنورد", 37.4747, 57.3291),
     CityCatalogEntry("سبزوار", "Sabzevar", "سبزوار", 36.2126, 57.6788),
+    CityCatalogEntry("تربت حیدریه", "Torbat-e Heydarieh", "تربت حيدريه", 35.2727, 59.2192),
+    CityCatalogEntry("تربت جام", "Torbat-e Jam", "تربت جام", 35.2439, 60.6231),
+    CityCatalogEntry("قوچان", "Quchan", "قوچان", 37.1064, 58.5100),
+    CityCatalogEntry("کاشمر", "Kashmar", "كاشمر", 35.2394, 58.4658),
+    CityCatalogEntry("گناباد", "Gonabad", "گناباد", 34.3517, 58.6836),
 
     // --- فارس و جنوب / Fars & the south ---
     CityCatalogEntry("شیراز", "Shiraz", "شيراز", 29.5918, 52.5837),
@@ -63,6 +68,11 @@ val DEFAULT_CITY_CATALOG: List<CityCatalogEntry> = listOf(
     CityCatalogEntry("بندر لنگه", "Bandar Lengeh", "بندر لنگه", 26.5578, 54.8807),
     CityCatalogEntry("کیش", "Kish Island", "جزيرة كيش", 26.5578, 53.9773),
     CityCatalogEntry("قشم", "Qeshm", "قشم", 26.9581, 56.2719),
+    CityCatalogEntry("جهرم", "Jahrom", "جهرم", 28.5000, 53.5581),
+    CityCatalogEntry("کازرون", "Kazerun", "كازرون", 29.6194, 51.6536),
+    CityCatalogEntry("مرودشت", "Marvdasht", "مرودشت", 29.8703, 52.8058),
+    CityCatalogEntry("لار", "Lar", "لار", 27.6781, 54.3383),
+    CityCatalogEntry("میناب", "Minab", "ميناب", 27.1467, 57.0800),
 
     // --- اصفهان و مرکز / Isfahan & central plateau ---
     CityCatalogEntry("اصفهان", "Isfahan", "أصفهان", 32.6546, 51.6680),
@@ -82,6 +92,18 @@ val DEFAULT_CITY_CATALOG: List<CityCatalogEntry> = listOf(
     CityCatalogEntry("سنندج", "Sanandaj", "سنندج", 35.3145, 46.9923),
     CityCatalogEntry("ایلام", "Ilam", "إيلام", 33.6374, 46.4227),
     CityCatalogEntry("خرم‌آباد", "Khorramabad", "خرم آباد", 33.4870, 48.3557),
+    CityCatalogEntry("شهرکرد", "Shahrekord", "شهركرد", 32.3256, 50.8644),
+    CityCatalogEntry("بروجرد", "Borujerd", "بروجرد", 33.8973, 48.7517),
+    CityCatalogEntry("ملایر", "Malayer", "ملاير", 34.2967, 48.8228),
+    CityCatalogEntry("نهاوند", "Nahavand", "نهاوند", 34.1906, 48.3736),
+    CityCatalogEntry("سقز", "Saqqez", "سقز", 36.2461, 46.2714),
+    CityCatalogEntry("مریوان", "Marivan", "مريوان", 35.5219, 46.1750),
+    CityCatalogEntry("مهاباد", "Mahabad", "مهاباد", 36.7628, 45.7211),
+    CityCatalogEntry("بوکان", "Bukan", "بوكان", 36.5225, 46.2081),
+    CityCatalogEntry("خوی", "Khoy", "خوي", 38.5503, 44.9517),
+    CityCatalogEntry("مرند", "Marand", "مرند", 38.4306, 45.7758),
+    CityCatalogEntry("میانه", "Miyaneh", "ميانه", 37.4272, 47.7156),
+    CityCatalogEntry("پارس‌آباد", "Parsabad", "پارس آباد", 39.6489, 47.9186),
 
     // --- شمال و دریای خزر / North & the Caspian coast ---
     CityCatalogEntry("رشت", "Rasht", "رشت", 37.2809, 49.5832),
@@ -91,6 +113,9 @@ val DEFAULT_CITY_CATALOG: List<CityCatalogEntry> = listOf(
     CityCatalogEntry("آمل", "Amol", "آمل", 36.4696, 52.3512),
     CityCatalogEntry("چالوس", "Chalus", "جالوس", 36.6550, 51.4200),
     CityCatalogEntry("بندر انزلی", "Bandar-e Anzali", "بندر أنزلي", 37.4646, 49.4599),
+    CityCatalogEntry("شاهرود", "Shahrud", "شاهرود", 36.4181, 54.9764),
+    CityCatalogEntry("دامغان", "Damghan", "دامغان", 36.1683, 54.3486),
+    CityCatalogEntry("گچساران", "Gachsaran", "گچساران", 30.3592, 50.7981),
 
     // --- خوزستان و جنوب‌غرب / Khuzestan & southwest ---
     CityCatalogEntry("اهواز", "Ahvaz", "الأهواز", 31.3183, 48.6706),
@@ -127,5 +152,37 @@ val DEFAULT_CITY_CATALOG: List<CityCatalogEntry> = listOf(
     CityCatalogEntry("مسکو", "Moscow", "موسكو", 55.7558, 37.6173),
     CityCatalogEntry("نیویورک", "New York", "نيويورك", 40.7128, -74.0060),
     CityCatalogEntry("تورنتو", "Toronto", "تورونتو", 43.6532, -79.3832),
-    CityCatalogEntry("سیدنی", "Sydney", "سيدني", -33.8688, 151.2093)
+    CityCatalogEntry("سیدنی", "Sydney", "سيدني", -33.8688, 151.2093),
+
+    // --- شمال آفریقا / North Africa ---
+    CityCatalogEntry("اسکندریه", "Alexandria", "الإسكندرية", 31.2001, 29.9187),
+    CityCatalogEntry("طرابلس (لیبی)", "Tripoli", "طرابلس", 32.8872, 13.1913),
+    CityCatalogEntry("تونس", "Tunis", "تونس", 36.8065, 10.1815),
+    CityCatalogEntry("الجزیره", "Algiers", "الجزائر", 36.7538, 3.0588),
+    CityCatalogEntry("رباط", "Rabat", "الرباط", 34.0209, -6.8416),
+    CityCatalogEntry("کازابلانکا", "Casablanca", "الدار البيضاء", 33.5731, -7.5898),
+
+    // --- آسیای میانه و قفقاز / Central Asia & the Caucasus ---
+    CityCatalogEntry("باکو", "Baku", "باكو", 40.4093, 49.8671),
+    CityCatalogEntry("دوشنبه", "Dushanbe", "دوشنبه", 38.5598, 68.7870),
+    CityCatalogEntry("تاشکند", "Tashkent", "طشقند", 41.2995, 69.2401),
+    CityCatalogEntry("اشگاباد", "Ashgabat", "عشق آباد", 37.9601, 58.3261),
+    CityCatalogEntry("بیشکک", "Bishkek", "بيشكك", 42.8746, 74.5698),
+    CityCatalogEntry("گروزنی", "Grozny", "غروزني", 43.3169, 45.6981),
+    CityCatalogEntry("سرینه‌وو", "Sarajevo", "سراييفو", 43.8563, 18.4131),
+
+    // --- جنوب و جنوب‌شرق آسیا / South & Southeast Asia ---
+    CityCatalogEntry("مالِه", "Malé", "ماليه", 4.1755, 73.5093),
+    CityCatalogEntry("سنگاپور", "Singapore", "سنغافورة", 1.3521, 103.8198),
+    CityCatalogEntry("بمبئی (مومبای)", "Mumbai", "مومباي", 19.0760, 72.8777),
+    CityCatalogEntry("حیدرآباد (هند)", "Hyderabad", "حيدر أباد", 17.3850, 78.4867),
+
+    // --- شهرهای مهم دیگر جهان / A few more world hubs ---
+    CityCatalogEntry("لس‌آنجلس", "Los Angeles", "لوس أنجلوس", 34.0522, -118.2437),
+    CityCatalogEntry("شیکاگو", "Chicago", "شيكاغو", 41.8781, -87.6298),
+    CityCatalogEntry("وین", "Vienna", "فيينا", 48.2082, 16.3738),
+    CityCatalogEntry("هامبورگ", "Hamburg", "هامبورغ", 53.5511, 9.9937),
+    CityCatalogEntry("مادرید", "Madrid", "مدريد", 40.4168, -3.7038),
+    CityCatalogEntry("رم", "Rome", "روما", 41.9028, 12.4964),
+    CityCatalogEntry("ژوهانسبورگ", "Johannesburg", "جوهانسبرغ", -26.2041, 28.0473)
 )
