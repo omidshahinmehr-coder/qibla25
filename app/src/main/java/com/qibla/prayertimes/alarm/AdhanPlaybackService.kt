@@ -14,7 +14,6 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import androidx.core.app.NotificationCompat
-import com.qibla.prayertimes.MainActivity
 import com.qibla.prayertimes.R
 
 class AdhanPlaybackService : Service() {
@@ -29,6 +28,7 @@ class AdhanPlaybackService : Service() {
         val prayerName = intent?.getStringExtra(AlarmScheduler.EXTRA_PRAYER)
         val prayer = AdhanPrayer.entries.firstOrNull { it.name == prayerName } ?: AdhanPrayer.FAJR
 
+        AdhanPlaybackState.setPlaying(prayer)
         startForeground(NOTIFICATION_ID, buildNotification(prayer))
         playSound(prayer)
 
@@ -63,8 +63,12 @@ class AdhanPlaybackService : Service() {
     private fun buildNotification(prayer: AdhanPrayer): Notification {
         createChannelIfNeeded()
 
-        val contentIntent = PendingIntent.getActivity(
-            this, 0, Intent(this, MainActivity::class.java),
+        val alertIntent = Intent(this, AdhanAlertActivity::class.java).apply {
+            putExtra(AlarmScheduler.EXTRA_PRAYER, prayer.name)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NO_USER_ACTION)
+        }
+        val alertPendingIntent = PendingIntent.getActivity(
+            this, 0, alertIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val stopIntent = Intent(this, StopAdhanReceiver::class.java)
@@ -80,7 +84,10 @@ class AdhanPlaybackService : Service() {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
             .setOngoing(true)
-            .setContentIntent(contentIntent)
+            .setContentIntent(alertPendingIntent)
+            // Brings AdhanAlertActivity to the front immediately — even over the lock screen —
+            // rather than leaving the alert as just a notification the user has to go find.
+            .setFullScreenIntent(alertPendingIntent, true)
             .addAction(0, getString(R.string.stop_sound_action), stopPendingIntent)
             .build()
     }
@@ -111,6 +118,7 @@ class AdhanPlaybackService : Service() {
             // already released or never fully prepared
         }
         mediaPlayer = null
+        AdhanPlaybackState.clear()
         @Suppress("DEPRECATION")
         stopForeground(true)
         stopSelf()
@@ -120,6 +128,7 @@ class AdhanPlaybackService : Service() {
         stopHandler.removeCallbacks(autoStopRunnable)
         mediaPlayer?.release()
         mediaPlayer = null
+        AdhanPlaybackState.clear()
         super.onDestroy()
     }
 
