@@ -15,6 +15,7 @@ import android.os.IBinder
 import android.os.Looper
 import androidx.core.app.NotificationCompat
 import com.qibla.prayertimes.R
+import com.qibla.prayertimes.util.LocalePrefs
 
 class AdhanPlaybackService : Service() {
 
@@ -24,18 +25,43 @@ class AdhanPlaybackService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
+    // Use the in-app language (not the system one) for every string this service produces:
+    // notification title/text/action and the channel name/description.
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocalePrefs.wrap(newBase))
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val prayerName = intent?.getStringExtra(AlarmScheduler.EXTRA_PRAYER)
         val prayer = AdhanPrayer.entries.firstOrNull { it.name == prayerName } ?: AdhanPrayer.FAJR
 
         AdhanPlaybackState.setPlaying(prayer)
         startForeground(NOTIFICATION_ID, buildNotification(prayer))
+        launchAlertScreen(prayer)
         playSound(prayer)
 
         // Safety net: never let the adhan ring longer than 4 minutes even if playback loops or hangs.
         stopHandler.postDelayed(autoStopRunnable, 4 * 60 * 1000L)
 
         return START_NOT_STICKY
+    }
+
+    /**
+     * Besides the notification's full-screen intent (which Android only honours when the
+     * "full-screen notifications" permission is granted), also try to open the alert screen
+     * directly. Background activity starts can be blocked by the OS, so failure is ignored.
+     */
+    private fun launchAlertScreen(prayer: AdhanPrayer) {
+        try {
+            startActivity(
+                Intent(this, AdhanAlertActivity::class.java).apply {
+                    putExtra(AlarmScheduler.EXTRA_PRAYER, prayer.name)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_NO_USER_ACTION)
+                }
+            )
+        } catch (e: Exception) {
+            // blocked by the system — the full-screen intent on the notification is the fallback
+        }
     }
 
     private fun playSound(prayer: AdhanPrayer) {
@@ -81,8 +107,9 @@ class AdhanPlaybackService : Service() {
             .setSmallIcon(R.drawable.ic_notification_adhan)
             .setContentTitle(getString(R.string.adhan_time_title, prayer.label(this)))
             .setContentText(getString(R.string.adhan_tap_to_stop))
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
             .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setOngoing(true)
             .setContentIntent(alertPendingIntent)
             // Brings AdhanAlertActivity to the front immediately — even over the lock screen —
@@ -95,15 +122,16 @@ class AdhanPlaybackService : Service() {
     private fun createChannelIfNeeded() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            if (manager.getNotificationChannel(CHANNEL_ID) == null) {
-                val channel = NotificationChannel(
-                    CHANNEL_ID, getString(R.string.adhan_channel_name), NotificationManager.IMPORTANCE_HIGH
-                ).apply {
-                    description = getString(R.string.adhan_channel_desc)
-                    setSound(null, null) // the service plays the chosen sound itself
-                }
-                manager.createNotificationChannel(channel)
+            // Always (re)create: for an existing channel Android only updates the name and
+            // description, which keeps them in sync with the in-app language.
+            val channel = NotificationChannel(
+                CHANNEL_ID, getString(R.string.adhan_channel_name), NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = getString(R.string.adhan_channel_desc)
+                setSound(null, null) // the service plays the chosen sound itself
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
             }
+            manager.createNotificationChannel(channel)
         }
     }
 
