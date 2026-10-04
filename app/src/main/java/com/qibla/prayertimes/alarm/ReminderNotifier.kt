@@ -9,11 +9,14 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.qibla.prayertimes.MainActivity
 import com.qibla.prayertimes.R
+import com.qibla.prayertimes.util.LocalePrefs
 
 object ReminderNotifier {
     private const val CHANNEL_ID = "adhan_reminder_channel"
 
-    fun show(context: Context, prayer: AdhanPrayer, minutes: Int) {
+    fun show(baseContext: Context, prayer: AdhanPrayer, minutes: Int) {
+        // Strings follow the in-app language, not the system language.
+        val context = LocalePrefs.wrap(baseContext)
         createChannelIfNeeded(context)
 
         val contentIntent = PendingIntent.getActivity(
@@ -38,14 +41,14 @@ object ReminderNotifier {
     private fun createChannelIfNeeded(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            if (manager.getNotificationChannel(CHANNEL_ID) == null) {
-                val channel = NotificationChannel(
-                    CHANNEL_ID, context.getString(R.string.reminder_channel_name), NotificationManager.IMPORTANCE_DEFAULT
-                ).apply {
-                    description = context.getString(R.string.reminder_channel_desc)
-                }
-                manager.createNotificationChannel(channel)
+            // Re-creating an existing channel just refreshes its name/description, so they
+            // follow the in-app language.
+            val channel = NotificationChannel(
+                CHANNEL_ID, context.getString(R.string.reminder_channel_name), NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                description = context.getString(R.string.reminder_channel_desc)
             }
+            manager.createNotificationChannel(channel)
         }
     }
 }
