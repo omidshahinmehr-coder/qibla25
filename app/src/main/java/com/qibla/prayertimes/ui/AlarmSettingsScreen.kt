@@ -121,6 +121,14 @@ fun AlarmSettingsScreen(onBack: () -> Unit) {
                 }
             }
 
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                val nm = context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+                if (!nm.canUseFullScreenIntent()) {
+                    Spacer(Modifier.height(14.dp))
+                    FullScreenIntentPermissionBanner(context)
+                }
+            }
+
             Spacer(Modifier.height(18.dp))
 
             key(refreshTick) {
@@ -284,6 +292,36 @@ private fun ExactAlarmPermissionBanner(context: Context) {
                 data = Uri.parse("package:${context.packageName}")
             }
             context.startActivity(intent)
+        }) {
+            Text(stringResource(R.string.open_settings), color = BrassLight, fontWeight = FontWeight.Bold, fontSize = 12.sp)
+        }
+    }
+}
+
+/** Android 14+ lets users revoke "full-screen notifications"; without it the adhan screen can't open over the lock screen. */
+@Composable
+private fun FullScreenIntentPermissionBanner(context: Context) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(Color(0x33E5A3A3))
+            .padding(12.dp)
+    ) {
+        Text(
+            stringResource(R.string.fullscreen_banner),
+            color = AmberText,
+            fontSize = 12.sp,
+            lineHeight = 18.sp
+        )
+        Spacer(Modifier.height(8.dp))
+        TextButton(onClick = {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                val intent = Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT).apply {
+                    data = Uri.parse("package:${context.packageName}")
+                }
+                context.startActivity(intent)
+            }
         }) {
             Text(stringResource(R.string.open_settings), color = BrassLight, fontWeight = FontWeight.Bold, fontSize = 12.sp)
         }
