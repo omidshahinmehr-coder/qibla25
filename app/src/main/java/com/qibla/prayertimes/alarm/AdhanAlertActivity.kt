@@ -7,6 +7,7 @@ import android.content.IntentFilter
 import android.media.AudioManager
 import android.os.Build
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -42,6 +43,7 @@ import com.qibla.prayertimes.ui.theme.Brass
 import com.qibla.prayertimes.ui.theme.NightDeep
 import com.qibla.prayertimes.ui.theme.QiblaAppTheme
 import com.qibla.prayertimes.ui.theme.ThemeState
+import com.qibla.prayertimes.util.LocalePrefs
 
 /**
  * Shown full-screen, over the lock screen, the instant the adhan starts playing — not just a
@@ -55,6 +57,11 @@ import com.qibla.prayertimes.ui.theme.ThemeState
 class AdhanAlertActivity : ComponentActivity() {
 
     private var screenOffReceiver: BroadcastReceiver? = null
+
+    // The alert screen follows the in-app language, not the system language.
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(LocalePrefs.wrap(newBase))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -116,6 +123,28 @@ class AdhanAlertActivity : ComponentActivity() {
         screenOffReceiver?.let { unregisterReceiver(it) }
         screenOffReceiver = null
         super.onPause()
+    }
+
+    /**
+     * Volume keys (also on the lock screen) raise/lower the adhan itself by adjusting the alarm
+     * stream directly, instead of relying on the system to route them.
+     */
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+            val audio = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            audio.adjustStreamVolume(
+                AudioManager.STREAM_ALARM,
+                if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) AudioManager.ADJUST_RAISE else AudioManager.ADJUST_LOWER,
+                AudioManager.FLAG_SHOW_UI
+            )
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
+    }
+
+    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) return true
+        return super.onKeyUp(keyCode, event)
     }
 
     private fun stopAndFinish() {
