@@ -163,4 +163,5 @@
     <string name="prayer_method_jafari">فقه جعفری (شیعه اثنی‌عشری)</string>
     <string name="prayer_method_jafari_desc">فجر ۱۶ درجه، عشاء ۱۴ درجه، مغرب ۴ درجه پس از غروب — مطابق دیدگاه فقه جعفری.</string>
     <string name="next_prayer_countdown">تا %1$s: %2$s</string>
+    <string name="fullscreen_banner">برای نمایش صفحه اذان روی صفحه قفل، اجازه‌ی «اعلان‌های تمام‌صفحه» را در تنظیمات اندروید فعال کنید.</string>
 </resources>
