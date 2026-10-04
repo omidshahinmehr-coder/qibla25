@@ -186,25 +186,33 @@ private fun AdhanAlertScreen(prayer: AdhanPrayer, onStop: () -> Unit) {
                 // (Estedad, from QiblaAppTheme's typography), same as the hint text below.
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
+                        text = stringResource(R.string.adhan_hadith_narrator),
+                        color = AmberText,
+                        fontSize = 19.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(Modifier.height(10.dp))
+                    Text(
                         text = stringResource(R.string.adhan_hadith_arabic),
                         color = AmberText,
-                        fontSize = 16.sp,
+                        fontSize = 22.sp,
                         textAlign = TextAlign.Center,
-                        lineHeight = 24.sp
+                        lineHeight = 36.sp
                     )
-                    Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.height(10.dp))
                     Text(
                         text = stringResource(R.string.adhan_hadith_translation),
                         color = AmberMuted,
-                        fontSize = 13.sp,
+                        fontSize = 18.sp,
                         textAlign = TextAlign.Center,
-                        lineHeight = 19.sp
+                        lineHeight = 28.sp
                     )
-                    Spacer(Modifier.height(6.dp))
+                    Spacer(Modifier.height(8.dp))
                     Text(
                         text = stringResource(R.string.adhan_hadith_source),
                         color = AmberMuted,
-                        fontSize = 11.sp,
+                        fontSize = 14.sp,
                         textAlign = TextAlign.Center
                     )
                 }
